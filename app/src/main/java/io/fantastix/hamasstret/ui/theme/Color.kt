@@ -3,14 +3,17 @@ package io.fantastix.hamasstret.ui.theme
 import androidx.compose.ui.graphics.Color
 
 val PngRed = Color(0xFFD21034)
+val PngRed2 = Color(0xFFFF6347)
 val Red = Color(0xFFB71C1C)
 val PngBlack = Color(0xFF000000)
 val PngYellow = Color(0xFFFFCB05)
+val PngYellow2 = Color(0xFFFDD835)
+val PngGold = Color(0xFFFFD700)
+val PngOchre = Color(0xFFD98310)
 val PngWhite = Color(0xFFFFFFFF)
 val PngEarthBrown = Color(0xFF5C3A21)
 val PngGreen = Color(0xFF3B7A57)
-val PngOchre = Color(0xFFD98310)
-val Yellow = Color(0xFFFDD835)
+val Blue = Color(0xFF00BFFF)
 
 val primaryLight = Color(0xFFA70025)
 val onPrimaryLight = Color(0xFFFFFFFF)

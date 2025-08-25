@@ -7,4 +7,6 @@
     <color name="primary_dark">#B71C1C</color>
     <color name="accent">#FFEB3B</color>
 
+    <color name="splash_background">#FFD0BCFF</color>
+
 </resources>

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="frequency_entries">
+        <item>Every 15 minutes</item>
+        <item>Hourly</item>
+        <item>Daily</item>
+        <item>Weekly</item>
+    </string-array>
+
+    <string-array name="frequency_values">
+        <item>15min</item>
+        <item>hourly</item>
+        <item>daily</item>
+        <item>weekly</item>
+    </string-array>
+</resources>

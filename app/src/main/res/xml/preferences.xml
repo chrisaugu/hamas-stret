@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+    <PreferenceCategory app:title="User Settings">
+        <EditTextPreference
+            app:key="username"
+            app:title="Username"
+            app:summary="Enter your username"
+            app:defaultValue="Guest" />
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="Appearance">
+        <SwitchPreferenceCompat
+            app:key="dark_mode"
+            app:title="Dark mode"
+            app:summary="Enable dark theme"
+            app:defaultValue="false" />
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="Notifications">
+        <ListPreference
+            app:key="notification_frequency"
+            app:title="Notification frequency"
+            app:summary="How often to receive notifications"
+            app:entries="@array/frequency_entries"
+            app:entryValues="@array/frequency_values"
+            app:defaultValue="daily" />
+    </PreferenceCategory>
+</PreferenceScreen>

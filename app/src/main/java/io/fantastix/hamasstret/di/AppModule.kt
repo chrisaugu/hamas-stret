@@ -4,6 +4,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import io.fantastix.hamasstret.repository.LocationRepository
 import io.fantastix.hamasstret.repository.TripRepositoryImpl
 import javax.inject.Singleton
 
@@ -17,4 +18,8 @@ class AppModule {
     @Provides
     @Singleton
     fun provideTripRepository(): TripRepositoryImpl = TripRepositoryImpl()
+
+//    @Provides
+//    @Singleton
+//    fun provideLocationRepository() = LocationRepository(getAppContext())
 }

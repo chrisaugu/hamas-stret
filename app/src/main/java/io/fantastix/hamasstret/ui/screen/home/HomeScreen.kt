@@ -6,14 +6,20 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.MutableLiveData
 import io.fantastix.hamasstret.navigation.Screen
 import kotlinx.coroutines.delay
 
 @Composable
 fun HomeScreen(onNavigate: (String) -> Unit) {
     var isTracking by remember { mutableStateOf(false) }
-    var fare by remember { mutableStateOf(2.00) }
-    var distance by remember { mutableStateOf(0.0) }
+    var fare by remember { mutableDoubleStateOf(2.00) }
+    var distance by remember { mutableDoubleStateOf(0.0) }
+    val userName = MutableLiveData<String>()
+
+    fun updateUserName(newName: String) {
+        userName.value = newName
+    }
 
     LaunchedEffect(isTracking) {
         while (isTracking) {

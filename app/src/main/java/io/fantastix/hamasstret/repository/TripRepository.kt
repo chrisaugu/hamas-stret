@@ -1,6 +1,5 @@
 package io.fantastix.hamasstret.repository
 
-import io.fantastix.hamasstret.network.TripService
 import io.fantastix.hamasstret.model.Trip
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow

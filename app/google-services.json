@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "784992027270",
+    "project_id": "push-notifications-demo-ede65",
+    "storage_bucket": "push-notifications-demo-ede65.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:784992027270:android:3349a977777fb8a04e4707",
+        "android_client_info": {
+          "package_name": "io.fantastix.hamasstret"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBVUZRxCvUCTnCLLkYsvJhtBO3DC5wAL5w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

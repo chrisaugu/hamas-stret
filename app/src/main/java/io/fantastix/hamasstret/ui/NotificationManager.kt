@@ -1,10 +1,12 @@
 package io.fantastix.hamasstret.ui
 
 import android.Manifest
+import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
+import android.content.Context.NOTIFICATION_SERVICE
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
@@ -13,6 +15,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.Person
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.content.ContextCompat.getString
 import java.util.concurrent.ConcurrentHashMap
 import io.fantastix.hamasstret.MainActivity
 import io.fantastix.hamasstret.R
@@ -76,6 +79,29 @@ class NotificationManager(private val context: Context) {
             }
             systemNotificationManager.createNotificationChannel(channel)
         }
+    }
+    fun createNotification(content: String): Notification {
+        val context = context.applicationContext;
+        val channelId = context.getString(R.string.hamasstret_notification_channel_id)
+        val channelName = context.getString(R.string.app_name)
+        val notificationManager =
+            context.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+
+        val channel = NotificationChannel(channelId, channelName, NotificationManager.IMPORTANCE_LOW)
+        notificationManager.createNotificationChannel(channel)
+
+        return NotificationCompat.Builder(context, channelId)
+            .setContentTitle(context.getString(R.string.app_name))
+            .setContentText(content)
+//            .setSmallIcon(R.drawable.ic_menu_mylocation)
+            .setOngoing(true)
+            .build()
+    }
+
+    fun updateNotification(content: String) {
+        val nm = context.getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+        val notification = createNotification(content)
+        nm.notify(1, notification)
     }
 
     /**

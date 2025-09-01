@@ -1,4 +1,4 @@
-package io.fantastix.hamasstret.navigation
+package io.fantastix.hamasstret.ui.components.navigation
 
 private object Route {
     const val HOME = "home"

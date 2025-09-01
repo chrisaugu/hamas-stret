@@ -7,7 +7,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.MutableLiveData
-import io.fantastix.hamasstret.navigation.Screen
+import io.fantastix.hamasstret.ui.components.navigation.Screen
 import kotlinx.coroutines.delay
 
 @Composable

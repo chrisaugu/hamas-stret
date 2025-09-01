@@ -15,6 +15,9 @@ object FareCalculator {
     private var lastLat: Double? = null
     private var lastLon: Double? = null
 
+    /**
+     *
+     */
     fun calculateFare(startLat: Double, startLon: Double, endLat: Double, endLon: Double): Double {
         val distanceMeters = calculateDistance(startLat, startLon, endLat, endLon)
 
@@ -22,11 +25,12 @@ object FareCalculator {
             return Fares.BASE_FARE
         }
 
-//        val distanceKm = distanceMeters / 1000.0
-//        return Fares.BASE_FARE + (distanceKm * Fares.COST_PER_KM)
         return calculateFare(distanceMeters)
     }
 
+    /**
+     *
+     */
     fun calculateFare(start: LocationData, end: LocationData): FareResult {
         val distance = calculateDistance(start, end)
         val distanceFare = distance * Fares.COST_PER_KM
@@ -41,18 +45,18 @@ object FareCalculator {
         )
     }
 
+    /**
+     *
+     */
     fun calculateFare(totalDistance: Double): Double {
         val distanceKm = totalDistance / 1000.0
         val fare = Fares.BASE_FARE + (distanceKm * Fares.COST_PER_KM)
         return fare
     }
 
-    fun calculateFare(totalDistance: Float): Double {
-        val distanceKm = totalDistance / 1000.0
-        val fare = Fares.BASE_FARE + (distanceKm * Fares.COST_PER_KM)
-        return fare
-    }
-
+    /**
+     *
+     */
     fun updateLocation(currentLat: Double, currentLon: Double): Double {
         if (lastLat != null && lastLon != null) {
             val result = FloatArray(1)
@@ -69,8 +73,6 @@ object FareCalculator {
         lastLat = currentLat
         lastLon = currentLon
 
-//        val distanceKm = totalDistance / 1000.0
-//        return Fares.BASE_FARE + (distanceKm * Fares.COST_PER_KM)
         return calculateFare(totalDistance)
     }
 
@@ -78,14 +80,17 @@ object FareCalculator {
      * Calculates the distance between two points in kilometers.
      * @return Distance in meters.
      */
-    fun calculateDistance(startLat: Double, startLon: Double, endLat: Double, endLon: Double): Float {
+    fun calculateDistance(startLat: Double, startLon: Double, endLat: Double, endLon: Double): Double {
         val result = FloatArray(1)
         Location.distanceBetween(startLat, startLon, endLat, endLon, result)
         val totalDistance = result[0] // in meters
 
-        return totalDistance
+        return totalDistance.toDouble()
     }
 
+    /**
+     *
+     */
     private fun calculateDistance(start: LocationData, end: LocationData): Double {
         // Haversine formula implementation
         val earthRadius = 6371 // Earth's radius in km
@@ -98,12 +103,18 @@ object FareCalculator {
         return earthRadius * c
     }
 
+    /**
+     *
+     */
     private fun calculateDuration(startTime: Long, endTime: Long): String {
         val durationMillis = endTime - startTime
         val minutes = TimeUnit.MILLISECONDS.toMinutes(durationMillis)
         return "${minutes}min"
     }
 
+    /**
+     *
+     */
     fun reset() {
         totalDistance = 0.0
         lastLat = null

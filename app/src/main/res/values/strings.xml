@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">Hamas Stret</string>
+
+    <!--    -->
+    <string name="hamasstret_notification_channel_id">trip_channel</string>
 </resources>

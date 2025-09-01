@@ -10,12 +10,13 @@ import android.location.LocationManager
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import io.fantastix.hamasstret.constants.TimerState
+import io.fantastix.hamasstret.repository.FareCalculator
+import io.fantastix.hamasstret.ui.NotificationManager
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -31,28 +32,29 @@ class MainViewModel(
     private val _isTracking = MutableStateFlow(false)
     val isTracking = _isTracking.asStateFlow()
     private var timerJob: Job? = null
-    private val _timer = MutableStateFlow(0L)
-    val timer = _timer.asStateFlow()
+    var elapsedTime by mutableLongStateOf(0L)
+        private set
     private val _formattedTime = MutableStateFlow("0s")
     val formattedTime: StateFlow<String> = _formattedTime
     var timerState by mutableStateOf(TimerState.STOPPED)
-        private set
-    var elapsedTime by mutableLongStateOf(0L)
         private set
     private var startTime: Long = 0L
     private val _uiState = MutableStateFlow<UiState<*>>(UiState.Loading)
     val uiState: StateFlow<UiState<*>> = _uiState.asStateFlow()
     private val _showBackButton = mutableStateOf(false)
     val showBackButton = _showBackButton
-    private var _distance = MutableStateFlow(0F)
+    private var _distance = MutableStateFlow(0.0)
     var distance = _distance.asStateFlow()
         private set
     private var _cost = MutableStateFlow(0.0)
     var cost = _cost.asStateFlow()
         private set
     //    private val dataStore = application.tripDataStore
+    private var startCoords: Location? = null
     private var lastCoords: Location? = null
     private val locationManager = application.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+    private var isTripActive: Boolean = false
+    private var notificationManager: NotificationManager = NotificationManager(application)
 
     fun updateBackButtonVisibility(shouldShow: Boolean) {
         _showBackButton.value = shouldShow
@@ -60,11 +62,11 @@ class MainViewModel(
 
 //    private val tripEmitter = MutableLiveData<List<Trip>>()
 //    val trips: LiveData<List<Trip>> = tripEmitter
-    init {
+//    init {
 //        loadTrips()
 //        loadData()
 //        loadTripData()
-    }
+//    }
 
     private fun loadData() {
 //        viewModelScope.launch {
@@ -86,7 +88,6 @@ class MainViewModel(
 //        tripEmitter.value = tripRepository.getTrips()
     }
 
-    // ======== DataStore Functions ======== //
     private fun loadTripData() {
 //        viewModelScope.launch {
 //            dataStore.data.collect { prefs ->
@@ -96,7 +97,7 @@ class MainViewModel(
 //        }
     }
 
-    private suspend fun saveTripData() {
+    private fun saveTripData() {
 //        dataStore.edit { prefs ->
 //            prefs[TripPrefs.DISTANCE] = distanceTravelled
 //            prefs[TripPrefs.COST] = costInKina
@@ -114,16 +115,9 @@ class MainViewModel(
 
         timerJob = viewModelScope.launch {
             while (isActive) {
+                _formattedTime.value = formatTime(elapsedTime)
                 delay(1000)
                 elapsedTime++
-                _formattedTime.value = formatTime(elapsedTime)
-//                elapsedTime = (System.currentTimeMillis() - startTime) / 1000
-//                val h = elapsedTime / 3600
-//                val m = (elapsedTime % 3600) / 60
-//                val s = elapsedTime % 60
-//                formattedTime = String.format("%02dh:%02dm:%02ds", h, m, s)
-//                delay(1000)
-//                _timer.value++
             }
         }
     }
@@ -140,59 +134,64 @@ class MainViewModel(
             _isTracking.value = false
             timerJob?.cancel()
             stopLocationUpdates()
-            
+
             // Reset the FareCalculator when pausing to prevent continued calculation
-            io.fantastix.hamasstret.repository.FareCalculator.reset()
+            FareCalculator.reset()
         }
     }
 
     fun stopTimer() {
         timerState = TimerState.STOPPED
         _isTracking.value = false
-        _timer.value = 0
         _formattedTime.value = "0s"
         elapsedTime = 0L
         stopLocationUpdates()
         timerJob?.cancel()
-        
+
         // Reset distance and cost when stopping
-        _distance.value = 0f
+        _distance.value = 0.0
         _cost.value = 0.0
-        
+
         // Reset last coordinates to prevent distance calculation on next start
         lastCoords = null
-        
-        // Reset the FareCalculator to clear any accumulated distance
-        io.fantastix.hamasstret.repository.FareCalculator.reset()
-    }
+        startCoords = null
 
-    fun toggleTimer() {
-        if (_isTracking.value) {
-            pauseTimer()
-        } else {
-            startTimer()
-        }
+        // Reset the FareCalculator to clear any accumulated distance
+        FareCalculator.reset()
     }
 
     fun refresh() {
         loadData()
     }
-    
+
+    fun startTrip() {
+        isTripActive = true
+        startTime = System.currentTimeMillis()
+        notificationManager.updateNotification("Trip started - tracking location...")
+    }
+
+    fun stopTrip() {
+        isTripActive = false
+        notificationManager.updateNotification("Trip stopped")
+    }
+
     fun resetTrip() {
-        _distance.value = 0f
+        _distance.value = 0.0
         _cost.value = 0.0
         elapsedTime = 0L
         _formattedTime.value = "0s"
         lastCoords = null
+        startCoords = null
         stopLocationUpdates()
-        
+
         // Reset the FareCalculator to clear any accumulated distance
-        io.fantastix.hamasstret.repository.FareCalculator.reset()
+        FareCalculator.reset()
     }
 
     override fun onCleared() {
         super.onCleared()
         timerJob?.cancel()
+        stopLocationUpdates()
     }
 
     private fun startLocationUpdates() {
@@ -220,29 +219,24 @@ class MainViewModel(
             lastCoords = location
             return
         }
-        
-        lastCoords?.let {
-            val addedDistance = it.distanceTo(location)
-            if (addedDistance > 0) {
-                _distance.value += addedDistance
-                calculateCost()
-                viewModelScope.launch { saveTripData() }
-            }
+
+        // Set starting point if not set yet
+        if (startCoords == null) {
+            startCoords = location
+            lastCoords = location
+            _distance.value = 0.0
+            _cost.value = FareCalculator.calculateFare(0.0)
+            return
+        }
+
+        // Distance from start point (meters)
+        val fromStart = startCoords?.distanceTo(location)?.toDouble() ?: 0.0
+        if (fromStart >= 0) {
+            _distance.value = fromStart
+            _cost.value = FareCalculator.calculateFare(fromStart)
+//            viewModelScope.launch { saveTripData() }
         }
         lastCoords = location
-    }
-
-    // ======== Cost Calculation ======== //
-    private fun calculateCost() {
-        val distanceKm = distance.value / 1000
-        val distanceFare = distanceKm * io.fantastix.hamasstret.constants.Fares.COST_PER_KM
-        _cost.value = io.fantastix.hamasstret.constants.Fares.BASE_FARE + distanceFare
-    }
-
-    fun updateCost() {
-        viewModelScope.launch {
-//            _cost.value =
-        }
     }
 
     private fun formatTime(totalSeconds: Long): String {

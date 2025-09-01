@@ -123,6 +123,7 @@ import io.fantastix.hamasstret.repository.TripRepository
 import io.fantastix.hamasstret.ui.LocationManager
 import io.fantastix.hamasstret.ui.PermissionManager
 import io.fantastix.hamasstret.ui.components.TribalButton
+import io.fantastix.hamasstret.ui.screen.history.LocationHistoryList
 import io.fantastix.hamasstret.ui.theme.Blue
 import io.fantastix.hamasstret.ui.theme.HamasStretTheme
 import io.fantastix.hamasstret.ui.theme.PngGold
@@ -196,7 +197,7 @@ class MainActivity : ComponentActivity() {
                         color = MaterialTheme.colorScheme.background
                     ) {
 //                        MapBottomSheet()
-                        TimerScreenContent(mainViewModel)
+                        TimerScreen(mainViewModel)
 //                        HomeScreen(mainViewModel)
                     }
                 }
@@ -530,17 +531,16 @@ fun MapBottomSheet() {
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.S)
 @Composable
-fun TimerScreenContent(mainViewModel: MainViewModel) {
+fun TimerScreen(mainViewModel: MainViewModel) {
     val context = LocalContext.current
 
     val locationManager = remember { LocationManager(context) }
-    val timerValue by mainViewModel.timer.collectAsState()
     val isTracking by mainViewModel.isTracking.collectAsState()
     val distance by mainViewModel.distance.collectAsState()
     val cost by mainViewModel.cost.collectAsState()
     val formattedTime by mainViewModel.formattedTime.collectAsState()
+    val timerState = mainViewModel.timerState
 
 //    val simulator = LocationSimulator(context)
 //    simulator.enableTestProvider()
@@ -645,50 +645,48 @@ fun TimerScreenContent(mainViewModel: MainViewModel) {
 //        }
 //    }
 
-    TimerScreen(
-        state = mainViewModel.timerState,
+    TimerScreenContent(
+        state = timerState,
         timerValue = formattedTime,
         cost = cost,
         distance = distance,
-        isTracking = isTracking,
         onStartClick = {
             mainViewModel.startTimer()
-            val intent = Intent(context, LocationTrackingService::class.java)
-            if (isTracking) {
-                context.stopService(intent)
-            } else {
-                context.startForegroundService(intent)
-            }
+//            val intent = Intent(context, LocationTrackingService::class.java)
+//            if (isTracking) {
+//                context.stopService(intent)
+//            } else {
+//                context.startForegroundService(intent)
+//            }
 //            isTracking = !isTracking
         },
-        onPauseClick = { 
+        onPauseClick = {
             mainViewModel.pauseTimer()
             // Stop the location tracking service when pausing
-            val intent = Intent(context, LocationTrackingService::class.java)
-            context.stopService(intent)
+//            val intent = Intent(context, LocationTrackingService::class.java)
+//            context.stopService(intent)
         },
-        onResumeClick = { 
+        onResumeClick = {
             mainViewModel.resumeTimer()
             // Start the location tracking service when resuming
-            val intent = Intent(context, LocationTrackingService::class.java)
-            context.startForegroundService(intent)
+//            val intent = Intent(context, LocationTrackingService::class.java)
+//            context.startForegroundService(intent)
         },
-        onStopClick = { 
+        onStopClick = {
             mainViewModel.stopTimer()
             // Also stop the location tracking service
-            val intent = Intent(context, LocationTrackingService::class.java)
-            context.stopService(intent)
+//            val intent = Intent(context, LocationTrackingService::class.java)
+//            context.stopService(intent)
         }
     )
 }
 
 @Composable
-fun TimerScreen(
+fun TimerScreenContent(
     state: TimerState,
     timerValue: String,
     cost: Double,
-    distance: Float,
-    isTracking: Boolean,
+    distance: Double,
     onStartClick: () -> Unit,
     onResumeClick: () -> Unit,
     onPauseClick: () -> Unit,
@@ -701,7 +699,6 @@ fun TimerScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-
         Text(
             text = "Current Fare",
             style = MaterialTheme.typography.titleMedium,
@@ -728,37 +725,38 @@ fun TimerScreen(
         Spacer(Modifier.height(16.dp))
 
         // When the timer is not running, show start button
-        // When the timer is running, show stop button and pause button
-        // When the timer is paused, show resume button and stop button
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            when (state) {
-                TimerState.STOPPED -> {
+        // When the timer is running or paused, show two side-by-side buttons splitting the row
+        when (state) {
+            TimerState.STOPPED -> {
+                TribalButton(
+                    modifier = Modifier.fillMaxWidth().height(60.dp),
+                    onClick = onStartClick,
+                    text = "Start"
+                )
+            }
+            TimerState.RUNNING -> {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
                     TribalButton(
-                        modifier = Modifier.fillMaxWidth().height(60.dp),
-                        onClick = onStartClick,
-                        text = "Start"
-                    )
-                }
-                TimerState.RUNNING -> {
-                    TribalButton(
-                        modifier = Modifier.height(60.dp),
+                        modifier = Modifier.weight(1f).height(60.dp),
                         onClick = onPauseClick,
                         text ="Pause"
                     )
                     TribalButton(
-                        modifier = Modifier.height(60.dp),
+                        modifier = Modifier.weight(1f).height(60.dp),
                         onClick = onStopClick,
                         text ="Stop"
                     )
                 }
-                TimerState.PAUSED -> {
+            }
+            TimerState.PAUSED -> {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
                     TribalButton(
-                        modifier = Modifier.height(60.dp),
+                        modifier = Modifier.weight(1f).height(60.dp),
                         onClick = onResumeClick,
                         text ="Resume"
                     )
                     TribalButton(
-                        modifier = Modifier.height(60.dp),
+                        modifier = Modifier.weight(1f).height(60.dp),
                         onClick = onStopClick,
                         text ="Stop"
                     )
@@ -1302,69 +1300,6 @@ fun CombinedPermissionHandler(
     }
 }
 
-@Composable
-fun FullScreenLoading() {
-    Box(
-        modifier = Modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        CircularProgressIndicator()
-    }
-}
-
-@Composable
-fun ErrorScreen(
-    message: String?,
-    onRetry: () -> Unit
-) {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Icon(
-            imageVector = Icons.Default.Clear,
-            contentDescription = "Error",
-            tint = MaterialTheme.colorScheme.error,
-            modifier = Modifier.size(48.dp)
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = message ?: "An unknown error occurred",
-            style = MaterialTheme.typography.bodyLarge,
-            textAlign = TextAlign.Center
-        )
-        Spacer(modifier = Modifier.height(24.dp))
-        Button(onClick = onRetry) {
-            Text("Retry")
-        }
-    }
-}
-
-@Composable
-fun EmptyStateScreen() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        Icon(
-            imageVector = Icons.Default.Info,
-            contentDescription = "Empty",
-            modifier = Modifier.size(48.dp)
-        )
-        Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = "No data available",
-            style = MaterialTheme.typography.bodyLarge
-        )
-    }
-}
-
 //@Composable
 //fun LocationTrackingScreen(viewModel: LocationViewModel = viewModel()) {
 //    val permissionState by viewModel.permissionState.collectAsState()
@@ -1489,7 +1424,6 @@ fun createLocationPermissionsRequest(): MultiplePermissionsState {
     )
     return multiplePermissionsState
 }
-
 
 @Composable
 fun LocationSimulationScreen(
@@ -1674,66 +1608,5 @@ fun ManualLocationInput(onLocationSet: (Double, Double) -> Unit) {
                 Text("Set Location")
             }
         }
-    }
-}
-
-@Composable
-fun LocationHistoryList(locations: List<LocationData>) {
-    var expanded by remember { mutableStateOf(false) }
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(4.dp)
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text("Location History", style = MaterialTheme.typography.titleMedium)
-                IconButton(onClick = { expanded = !expanded }) {
-                    Icon(
-                        imageVector = if (expanded) Icons.Default.Info else Icons.Default.Clear,
-                        contentDescription = if (expanded) "Collapse" else "Expand"
-                    )
-                }
-            }
-
-            AnimatedVisibility(visible = expanded) {
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(max = 200.dp)
-                ) {
-                    items(locations.reversed()) { location ->
-                        LocationHistoryItem(location = location)
-                        HorizontalDivider(
-                            Modifier,
-                            DividerDefaults.Thickness,
-                            DividerDefaults.color
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun LocationHistoryItem(location: LocationData) {
-    Column(
-        modifier = Modifier.padding(8.dp)
-    ) {
-        Text(
-            text = "${"%.6f".format(location.latitude)}, ${"%.6f".format(location.longitude)}",
-            style = MaterialTheme.typography.bodyMedium
-        )
-        Text(
-            text = SimpleDateFormat("HH:mm:ss", Locale.getDefault()).format(Date(location.timestamp)),
-            style = MaterialTheme.typography.bodySmall
-        )
     }
 }

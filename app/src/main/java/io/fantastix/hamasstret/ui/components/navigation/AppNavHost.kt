@@ -1,4 +1,4 @@
-package io.fantastix.hamasstret.navigation
+package io.fantastix.hamasstret.ui.components.navigation
 
 import android.content.Context
 import androidx.compose.runtime.Composable

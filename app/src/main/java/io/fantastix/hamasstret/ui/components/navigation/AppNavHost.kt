@@ -7,7 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.dialog
 import androidx.navigation.compose.rememberNavController
-import io.fantastix.hamasstret.MainViewModel
+import io.fantastix.hamasstret.viewmodel.MainViewModel
 import io.fantastix.hamasstret.ui.screen.about.AboutScreen
 import io.fantastix.hamasstret.ui.screen.fare.FareScreen
 import io.fantastix.hamasstret.ui.screen.history.HistoryScreen

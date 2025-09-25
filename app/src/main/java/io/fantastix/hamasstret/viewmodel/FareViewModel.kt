@@ -6,14 +6,9 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
-import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.CreationExtras
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionState
-import io.fantastix.hamasstret.HamasStretApp
-import io.fantastix.hamasstret.PermissionHandler
 import io.fantastix.hamasstret.model.FareResult
 import io.fantastix.hamasstret.model.LocationData
 import io.fantastix.hamasstret.repository.FareCalculator

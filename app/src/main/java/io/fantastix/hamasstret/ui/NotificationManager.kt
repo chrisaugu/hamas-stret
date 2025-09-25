@@ -15,9 +15,8 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationCompat
 import androidx.core.app.Person
 import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat.getString
 import java.util.concurrent.ConcurrentHashMap
-import io.fantastix.hamasstret.MainActivity
+import io.fantastix.hamasstret.ui.screen.main.MainActivity
 import io.fantastix.hamasstret.R
 
 /**

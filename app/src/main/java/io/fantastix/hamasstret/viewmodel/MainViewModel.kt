@@ -1,4 +1,4 @@
-package io.fantastix.hamasstret
+package io.fantastix.hamasstret.viewmodel
 
 import android.Manifest
 import android.app.Application
